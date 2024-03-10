@@ -1,0 +1,58 @@
+import { ethers } from "ethers";
+import React, { useEffect, useState } from "react";
+import ContractABI from "./ABI.json";
+
+const CONTRACT_ADDRESS = "0xef0FFCBb3Acb6c396e4FcE52B8e359959A7730FD";
+
+function DrawCards() {
+  const [userAddress, setUserAddress] = useState("");
+
+  const drawCards = async () => {
+    let signer = null;
+    let provider = null;
+    const init = async () => {
+      if (window.ethereum) {
+        try {
+          if (window.ethereum != null) {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            console.log("I am the signer" + signer);
+          }
+
+          const address = await signer.getAddress();
+          setUserAddress(address);
+          console.log("DrawCards : Addres : " + address);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      } else {
+        alert("Ethereum object not found, install MetaMask.");
+      }
+    };
+
+    init();
+    console.log("Yeeticus");
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ContractABI, signer);
+    try {
+      const newCardId = await contract.drawCard();
+      await newCardId.wait();
+      console.log(newCardId);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  return (
+    <div className="subContainer">
+      <button
+        onClick={() => {
+          drawCards();
+        }}
+      >
+        Draw Cards
+      </button>
+    </div>
+  );
+}
+
+export default DrawCards;
